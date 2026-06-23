@@ -497,6 +497,16 @@ public class TradingService implements ITradingService {
 			final String exchange, final String symbol, final TradeType tradeType, final OrderType orderType,
 			final ProductType productType, final int quantity, final float price, final float triggerPrice,
 			final Validity validity, final Boolean amo, final String publisherId, final String commandId) {
+		return this.placeOrderMCA(apiKey, pseudoAccount, exchange, symbol, tradeType, orderType, productType, quantity,
+				price, triggerPrice, validity, amo, publisherId, commandId, null);
+	}
+
+	@Override
+	public IOperationResponse<String> placeOrderMCA(final String apiKey, final String pseudoAccount,
+			final String exchange, final String symbol, final TradeType tradeType, final OrderType orderType,
+			final ProductType productType, final int quantity, final float price, final float triggerPrice,
+			final Validity validity, final Boolean amo, final String publisherId, final String commandId,
+			final String traceId) {
 		final Map<String, Object> params = new HashMap<>();
 		params.put("variety", REGULAR);
 		params.put("pseudoAccount", pseudoAccount);
@@ -512,6 +522,9 @@ public class TradingService implements ITradingService {
 		params.put("amo", amo);
 		params.put("publisherId", publisherId);
 		params.put("commandId", commandId);
+		if (traceId != null) {
+			params.put("traceId", traceId);
+		}
 
 		final HttpResponse<OperationResponse<String>> response = this.client.post(this.placeAdvancedOrderUrl)
 				.header(API_KEY_HEADER, apiKey).fields(params).asObject(new GenericType<OperationResponse<String>>() {

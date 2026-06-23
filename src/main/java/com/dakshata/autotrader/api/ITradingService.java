@@ -304,6 +304,16 @@ public interface ITradingService {
 
 	/**
 	 * This is for internal use. It is used by master-child order copying process.
+	 * <p>
+	 * Variant that also carries a {@code traceId} so end-to-end timing of the
+	 * master&rarr;child copy unit can be correlated across services.
+	 */
+	IOperationResponse<String> placeOrderMCA(String apiKey, String pseudoAccount, String exchange, String symbol,
+			TradeType tradeType, OrderType orderType, ProductType productType, int quantity, float price,
+			float triggerPrice, Validity validity, Boolean amo, String publisherId, String commandId, String traceId);
+
+	/**
+	 * This is for internal use. It is used by master-child order copying process.
 	 */
 	IOperationResponse<Boolean> cancelOrderMCA(String apiKey, String pseudoAccount, String platformId,
 			String commandId);
