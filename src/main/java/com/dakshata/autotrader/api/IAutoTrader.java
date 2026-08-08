@@ -3,9 +3,13 @@
  */
 package com.dakshata.autotrader.api;
 
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.dakshata.constants.trading.*;
+import com.dakshata.data.model.autotrader.service.AccountValidationPublic;
+import com.dakshata.data.model.autotrader.service.TradingAccountPublic;
 import com.dakshata.data.model.common.IOperationResponse;
 import com.dakshata.trading.model.platform.PlatformHolding;
 import com.dakshata.trading.model.platform.PlatformMargin;
@@ -33,6 +37,71 @@ public interface IAutoTrader {
 	 * @return live pseudo accounts
 	 */
 	IOperationResponse<Set<String>> fetchLivePseudoAccounts();
+
+	/**
+	 * Provides every trading account under your user, with its broker, platform, nickname and
+	 * licence details. Never returns credentials or any other sensitive field. For more
+	 * information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/fetch-all-trading-accounts/">api docs</a>.
+	 *
+	 * @return the trading accounts under your user
+	 */
+	IOperationResponse<Set<TradingAccountPublic>> fetchAllTradingAccounts();
+
+	/**
+	 * Adds a new broker trading account. The keys your account needs depend on the broker and
+	 * platform, so see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/create-or-update-trading-account/">api docs</a>
+	 * for the common and broker specific fields.
+	 *
+	 * @param account the account fields, as documented for your broker
+	 * @return the id of the trading account that was created
+	 */
+	IOperationResponse<Long> createTradingAccount(Map<String, String> account);
+
+	/**
+	 * Updates an existing broker trading account. Takes the same fields as
+	 * {@link #createTradingAccount(Map)}. For more information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/create-or-update-trading-account/">api docs</a>.
+	 *
+	 * @param account the account fields, as documented for your broker
+	 * @return the id of the trading account that was updated
+	 */
+	IOperationResponse<Long> updateTradingAccount(Map<String, String> account);
+
+	/**
+	 * Checks whether a set of broker credentials is valid, without saving an account. Useful before
+	 * calling {@link #createTradingAccount(Map)}. For more information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/validate-trading-account-credentials/">api
+	 * docs</a>.
+	 *
+	 * @param account the account fields, as documented for your broker
+	 * @return true when the credentials are valid
+	 */
+	IOperationResponse<Boolean> validateCredentials(Map<String, String> account);
+
+	/**
+	 * Checks whether an account you have already saved can still log in to the broker. Useful every
+	 * morning before the market opens, to find accounts with expired credentials early. For more
+	 * information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/validate-trading-account-credentials/">api
+	 * docs</a>.
+	 *
+	 * @param tradingAccountId the trading account id
+	 * @return true when the account can log in
+	 */
+	IOperationResponse<Boolean> validateAccount(Long tradingAccountId);
+
+	/**
+	 * Checks every trading account under your user in one call, and reports each one separately.
+	 * The pre-market check {@link #validateAccount(Long)} does, for all accounts at once. For more
+	 * information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/validate-trading-account-credentials/">api
+	 * docs</a>.
+	 *
+	 * @return one result per trading account
+	 */
+	IOperationResponse<List<AccountValidationPublic>> validateAllAccounts();
 
 	/**
 	 * Places an order. For more information, please see <a href=

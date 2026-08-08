@@ -17,6 +17,8 @@ import java.util.Set;
 import com.dakshata.constants.trading.*;
 import com.dakshata.data.model.autotrader.web.AdjustHoldingsRequest;
 import com.dakshata.data.model.autotrader.web.AdjustHoldingsResponse;
+import com.dakshata.data.model.autotrader.service.AccountValidationPublic;
+import com.dakshata.data.model.autotrader.service.TradingAccountPublic;
 import com.dakshata.data.model.common.IOperationResponse;
 import com.dakshata.data.model.common.OperationResponse;
 import com.dakshata.trading.model.platform.PlatformHolding;
@@ -47,6 +49,9 @@ public class TradingService implements ITradingService {
 	private static final String ACCOUNT_URI = "/account";
 
 	private final String commandUrl, livePseudoAccountsUrl;
+
+	private final String fetchAllTradingAccountsUrl, createTradingAccountUrl, updateTradingAccountUrl,
+			validateCredentialsUrl, validateAccountUrl, validateAllAccountsUrl;
 
 	private final String readPlatformOrdersUrl, readPlatformPositionsUrl, readPlatformMarginsUrl,
 			readPlatformHoldingsUrl;
@@ -86,6 +91,12 @@ public class TradingService implements ITradingService {
 		this.cancelAllOrdersUrl = serviceUrl + TRADING_URI + "/cancelAllOrders";
 		this.modifyOrderByPlatformIdUrl = serviceUrl + TRADING_URI + "/modifyOrderByPlatformId";
 		this.livePseudoAccountsUrl = serviceUrl + ACCOUNT_URI + "/fetchLivePseudoAccounts";
+		this.fetchAllTradingAccountsUrl = serviceUrl + ACCOUNT_URI + "/fetchAllTradingAccounts";
+		this.createTradingAccountUrl = serviceUrl + ACCOUNT_URI + "/createTradingAccount";
+		this.updateTradingAccountUrl = serviceUrl + ACCOUNT_URI + "/updateTradingAccount";
+		this.validateCredentialsUrl = serviceUrl + ACCOUNT_URI + "/validateCredentials";
+		this.validateAccountUrl = serviceUrl + ACCOUNT_URI + "/validateAccount";
+		this.validateAllAccountsUrl = serviceUrl + ACCOUNT_URI + "/validateAllAccounts";
 		this.squareOffPositionUrl = serviceUrl + TRADING_URI + "/squareOffPosition";
 		this.squareOffTvPositionUrl = serviceUrl + TRADING_URI + "/squareOffTvPosition";
 		this.squareOffPortfolioUrl = serviceUrl + TRADING_URI + "/squareOffPortfolio";
@@ -433,6 +444,62 @@ public class TradingService implements ITradingService {
 		final HttpResponse<OperationResponse<Set<PlatformHolding>>> response = this.client
 				.post(this.readPlatformHoldingsUrl).field("pseudoAccount", pseudoAccount)
 				.asObject(new GenericType<OperationResponse<Set<PlatformHolding>>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<Set<TradingAccountPublic>> fetchAllTradingAccounts() {
+		final HttpResponse<OperationResponse<Set<TradingAccountPublic>>> response = this.client
+				.get(this.fetchAllTradingAccountsUrl)
+				.asObject(new GenericType<OperationResponse<Set<TradingAccountPublic>>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<Long> createTradingAccount(@NonNull final Map<String, String> account) {
+		return this.postAccount(this.createTradingAccountUrl, account);
+	}
+
+	@Override
+	public IOperationResponse<Long> updateTradingAccount(@NonNull final Map<String, String> account) {
+		return this.postAccount(this.updateTradingAccountUrl, account);
+	}
+
+	private IOperationResponse<Long> postAccount(final String url, final Map<String, String> account) {
+		final HttpResponse<OperationResponse<Long>> response = this.client.post(url).fields(new HashMap<>(account))
+				.asObject(new GenericType<OperationResponse<Long>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<Boolean> validateCredentials(@NonNull final Map<String, String> account) {
+		final HttpResponse<OperationResponse<Boolean>> response = this.client.post(this.validateCredentialsUrl)
+				.fields(new HashMap<>(account)).asObject(new GenericType<OperationResponse<Boolean>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<Boolean> validateAccount(@NonNull final Long tradingAccountId) {
+		final HttpResponse<OperationResponse<Boolean>> response = this.client.post(this.validateAccountUrl)
+				.field("tradingAccId", tradingAccountId).asObject(new GenericType<OperationResponse<Boolean>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<List<AccountValidationPublic>> validateAllAccounts() {
+		final HttpResponse<OperationResponse<List<AccountValidationPublic>>> response = this.client
+				.post(this.validateAllAccountsUrl)
+				.asObject(new GenericType<OperationResponse<List<AccountValidationPublic>>>() {
 				});
 
 		return this.processResponse(response);

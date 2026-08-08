@@ -8,6 +8,7 @@ import static com.dakshata.constants.autotrader.IAutoTrader.API_KEY_HEADER;
 import static java.util.Collections.synchronizedMap;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -15,6 +16,8 @@ import java.util.function.Supplier;
 import org.apache.http.NoHttpResponseException;
 
 import com.dakshata.constants.trading.*;
+import com.dakshata.data.model.autotrader.service.AccountValidationPublic;
+import com.dakshata.data.model.autotrader.service.TradingAccountPublic;
 import com.dakshata.data.model.common.IOperationResponse;
 import com.dakshata.trading.model.platform.PlatformHolding;
 import com.dakshata.trading.model.platform.PlatformMargin;
@@ -71,6 +74,36 @@ public class AutoTrader implements IAutoTrader {
 	@Override
 	public IOperationResponse<Set<String>> fetchLivePseudoAccounts() {
 		return this.executeWithRetry(() -> this.tradingService.fetchLivePseudoAccounts());
+	}
+
+	@Override
+	public IOperationResponse<Set<TradingAccountPublic>> fetchAllTradingAccounts() {
+		return this.executeWithRetry(() -> this.tradingService.fetchAllTradingAccounts());
+	}
+
+	@Override
+	public IOperationResponse<Long> createTradingAccount(@NonNull final Map<String, String> account) {
+		return this.executeWithRetry(() -> this.tradingService.createTradingAccount(account));
+	}
+
+	@Override
+	public IOperationResponse<Long> updateTradingAccount(@NonNull final Map<String, String> account) {
+		return this.executeWithRetry(() -> this.tradingService.updateTradingAccount(account));
+	}
+
+	@Override
+	public IOperationResponse<Boolean> validateCredentials(@NonNull final Map<String, String> account) {
+		return this.executeWithRetry(() -> this.tradingService.validateCredentials(account));
+	}
+
+	@Override
+	public IOperationResponse<Boolean> validateAccount(@NonNull final Long tradingAccountId) {
+		return this.executeWithRetry(() -> this.tradingService.validateAccount(tradingAccountId));
+	}
+
+	@Override
+	public IOperationResponse<List<AccountValidationPublic>> validateAllAccounts() {
+		return this.executeWithRetry(() -> this.tradingService.validateAllAccounts());
 	}
 
 	@Override
