@@ -123,6 +123,7 @@ Full step-by-step guide: **[Java library setup](https://stocksdeveloper.in/docum
 | ⚙️ Java library setup | https://stocksdeveloper.in/documentation/client-setup/java-library/ |
 | 🆓 Start free (1-month trial) | https://webx.stocksdeveloper.in/register |
 | ✉️ Contact us | https://stocksdeveloper.in/contact/ |
+| 🛠️ Maintainers: releasing | [RELEASING.md](RELEASING.md) |
 
 ## About Stocks Developer
 
