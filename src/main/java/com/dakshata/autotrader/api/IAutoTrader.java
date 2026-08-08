@@ -105,6 +105,77 @@ public interface IAutoTrader {
 			TradeType tradeType, OrderType orderType, int quantity, float price, float triggerPrice);
 
 	/**
+	 * Places an AutoTrader bracket order — our own bracket order, which works with
+	 * every broker we support, including brokers that do not offer bracket orders of
+	 * their own. For more information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/place-autotrader-bracket-order/">api
+	 * docs</a>.
+	 *
+	 * <p>
+	 * The entry is sent to your broker as an ordinary intraday order and the target,
+	 * stoploss and trailing stoploss are watched by AutoTrader. It does not give the
+	 * extra intraday margin a broker's own bracket order sometimes gives, and the
+	 * position is squared off automatically before the market closes.
+	 * </p>
+	 *
+	 * <p>
+	 * {@code target}, {@code stoploss} and {@code trailingStoploss} are distances in
+	 * rupees from your entry price, exactly as they are for
+	 * {@link #placeBracketOrder}. The {@code trailingStoploss} is the step the stop
+	 * moves in each time the price advances by that much, so it needs a
+	 * {@code stoploss} alongside it to say how far behind the price the stop sits.
+	 * </p>
+	 *
+	 * @param pseudoAccount    pseudo account
+	 * @param exchange         exchange
+	 * @param symbol           symbol
+	 * @param tradeType        trade type
+	 * @param orderType        order type
+	 * @param quantity         quantity
+	 * @param price            price
+	 * @param triggerPrice     trigger price (entry trigger, for a stoploss entry
+	 *                         order; pass zero otherwise)
+	 * @param target           target, in rupees away from your entry price
+	 * @param stoploss         stoploss, in rupees away from your entry price
+	 * @param trailingStoploss trailing stoploss step, in rupees (pass zero for a
+	 *                         fixed stoploss)
+	 * @return the order id given by your stock broker
+	 */
+	IOperationResponse<String> placeAutoTraderBracketOrder(String pseudoAccount, String exchange, String symbol,
+			TradeType tradeType, OrderType orderType, int quantity, float price, float triggerPrice, float target,
+			float stoploss, float trailingStoploss);
+
+	/**
+	 * Places an AutoTrader cover order — a stoploss without a target, which works
+	 * with every broker we support. For more information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/place-autotrader-cover-order/">api
+	 * docs</a>.
+	 *
+	 * <p>
+	 * Note the difference from {@link #placeCoverOrder}: a broker cover order
+	 * carries its stop as an absolute price in {@code triggerPrice}, whereas an
+	 * AutoTrader cover order carries it as a distance in rupees from your entry
+	 * price in {@code stoploss}, exactly like the bracket form. There is no trigger
+	 * price to pass.
+	 * </p>
+	 *
+	 * @param pseudoAccount    pseudo account
+	 * @param exchange         exchange
+	 * @param symbol           symbol
+	 * @param tradeType        trade type
+	 * @param orderType        order type
+	 * @param quantity         quantity
+	 * @param price            price
+	 * @param stoploss         stoploss, in rupees away from your entry price
+	 * @param trailingStoploss trailing stoploss step, in rupees (pass zero for a
+	 *                         fixed stoploss)
+	 * @return the order id given by your stock broker
+	 */
+	IOperationResponse<String> placeAutoTraderCoverOrder(String pseudoAccount, String exchange, String symbol,
+			TradeType tradeType, OrderType orderType, int quantity, float price, float stoploss,
+			float trailingStoploss);
+
+	/**
 	 * Modifies the order as per the parameters passed.
 	 *
 	 * @param pseudoAccount pseudo account

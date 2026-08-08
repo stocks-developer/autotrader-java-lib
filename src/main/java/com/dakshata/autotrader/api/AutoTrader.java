@@ -110,6 +110,24 @@ public class AutoTrader implements IAutoTrader {
 	}
 
 	@Override
+	public IOperationResponse<String> placeAutoTraderBracketOrder(@NonNull final String pseudoAccount,
+			@NonNull final String exchange, @NonNull final String symbol, @NonNull final TradeType tradeType,
+			@NonNull final OrderType orderType, final int quantity, final float price, final float triggerPrice,
+			final float target, final float stoploss, final float trailingStoploss) {
+		return this.executeWithRetry(() -> this.tradingService.placeAutoTraderBracketOrder(pseudoAccount, exchange,
+				symbol, tradeType, orderType, quantity, price, triggerPrice, target, stoploss, trailingStoploss));
+	}
+
+	@Override
+	public IOperationResponse<String> placeAutoTraderCoverOrder(@NonNull final String pseudoAccount,
+			@NonNull final String exchange, @NonNull final String symbol, @NonNull final TradeType tradeType,
+			@NonNull final OrderType orderType, final int quantity, final float price, final float stoploss,
+			final float trailingStoploss) {
+		return this.executeWithRetry(() -> this.tradingService.placeAutoTraderCoverOrder(pseudoAccount, exchange,
+				symbol, tradeType, orderType, quantity, price, stoploss, trailingStoploss));
+	}
+
+	@Override
 	public IOperationResponse<Boolean> cancelAllOrders(final String pseudoAccount) {
 		return this.executeWithRetry(() -> this.tradingService.cancelAllOrders(pseudoAccount));
 	}

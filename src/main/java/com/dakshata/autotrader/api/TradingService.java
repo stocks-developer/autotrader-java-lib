@@ -52,7 +52,7 @@ public class TradingService implements ITradingService {
 			readPlatformHoldingsUrl;
 
 	private final String placeOrderUrl, placeTvOrderUrl, placeRegularOrderUrl, placeCoverOrderUrl, placeBracketOrderUrl,
-			placeAdvancedOrderUrl;
+			placeAdvancedOrderUrl, placeAutoTraderBracketOrderUrl, placeAutoTraderCoverOrderUrl;
 
 	private final String cancelOrderByPlatformIdUrl, modifyOrderByPlatformIdUrl;
 
@@ -79,6 +79,8 @@ public class TradingService implements ITradingService {
 		this.placeCoverOrderUrl = serviceUrl + TRADING_URI + "/placeCoverOrder";
 		this.placeBracketOrderUrl = serviceUrl + TRADING_URI + "/placeBracketOrder";
 		this.placeAdvancedOrderUrl = serviceUrl + TRADING_URI + "/placeAdvancedOrder";
+		this.placeAutoTraderBracketOrderUrl = serviceUrl + TRADING_URI + "/placeAutoTraderBracketOrder";
+		this.placeAutoTraderCoverOrderUrl = serviceUrl + TRADING_URI + "/placeAutoTraderCoverOrder";
 		this.cancelOrderByPlatformIdUrl = serviceUrl + TRADING_URI + "/cancelOrderByPlatformId";
 		this.cancelChildOrdersByPlatformIdUrl = serviceUrl + TRADING_URI + "/cancelChildOrdersByPlatformId";
 		this.cancelAllOrdersUrl = serviceUrl + TRADING_URI + "/cancelAllOrders";
@@ -215,6 +217,48 @@ public class TradingService implements ITradingService {
 		params.put("triggerPrice", triggerPrice);
 
 		return this.postOrder(this.placeCoverOrderUrl, params);
+	}
+
+	@Override
+	public IOperationResponse<String> placeAutoTraderBracketOrder(@NonNull final String pseudoAccount,
+			@NonNull final String exchange, @NonNull final String symbol, @NonNull final TradeType tradeType,
+			@NonNull final OrderType orderType, final int quantity, final float price, final float triggerPrice,
+			final float target, final float stoploss, final float trailingStoploss) {
+		final Map<String, Object> params = new HashMap<>();
+		params.put("pseudoAccount", pseudoAccount);
+		params.put("exchange", exchange);
+		params.put("symbol", symbol);
+		params.put("tradeType", tradeType);
+		params.put("orderType", orderType);
+		params.put("quantity", quantity);
+		params.put("price", price);
+		params.put("triggerPrice", triggerPrice);
+		params.put("target", target);
+		params.put("stoploss", stoploss);
+		params.put("trailingStoploss", trailingStoploss);
+
+		return this.postOrder(this.placeAutoTraderBracketOrderUrl, params);
+	}
+
+	@Override
+	public IOperationResponse<String> placeAutoTraderCoverOrder(@NonNull final String pseudoAccount,
+			@NonNull final String exchange, @NonNull final String symbol, @NonNull final TradeType tradeType,
+			@NonNull final OrderType orderType, final int quantity, final float price, final float stoploss,
+			final float trailingStoploss) {
+		final Map<String, Object> params = new HashMap<>();
+		params.put("pseudoAccount", pseudoAccount);
+		params.put("exchange", exchange);
+		params.put("symbol", symbol);
+		params.put("tradeType", tradeType);
+		params.put("orderType", orderType);
+		params.put("quantity", quantity);
+		params.put("price", price);
+		params.put("stoploss", stoploss);
+		params.put("trailingStoploss", trailingStoploss);
+
+		// No triggerPrice: an AutoTrader cover order carries its stop as a rupee distance in
+		// `stoploss`, unlike a broker cover order which overloads triggerPrice as the stop price.
+		return this.postOrder(this.placeAutoTraderCoverOrderUrl, params);
 	}
 
 	@Override
@@ -499,6 +543,42 @@ public class TradingService implements ITradingService {
 			final Validity validity, final Boolean amo, final String publisherId, final String commandId) {
 		return this.placeOrderMCA(apiKey, pseudoAccount, exchange, symbol, tradeType, orderType, productType, quantity,
 				price, triggerPrice, validity, amo, publisherId, commandId, null);
+	}
+
+	@Override
+	public IOperationResponse<String> placeOrderMCA(final String apiKey, final Variety variety,
+			final String pseudoAccount, final String exchange, final String symbol, final TradeType tradeType,
+			final OrderType orderType, final ProductType productType, final int quantity, final float price,
+			final float triggerPrice, final float target, final float stoploss, final float trailingStoploss,
+			final Validity validity, final Boolean amo, final String publisherId, final String commandId,
+			final String traceId) {
+		final Map<String, Object> params = new HashMap<>();
+		params.put("variety", (variety == null) ? REGULAR : variety);
+		params.put("pseudoAccount", pseudoAccount);
+		params.put("exchange", exchange);
+		params.put("symbol", symbol);
+		params.put("tradeType", tradeType);
+		params.put("orderType", orderType);
+		params.put("productType", productType);
+		params.put("quantity", quantity);
+		params.put("price", price);
+		params.put("triggerPrice", triggerPrice);
+		params.put("target", target);
+		params.put("stoploss", stoploss);
+		params.put("trailingStoploss", trailingStoploss);
+		params.put("validity", validity);
+		params.put("amo", amo);
+		params.put("publisherId", publisherId);
+		params.put("commandId", commandId);
+		if (traceId != null) {
+			params.put("traceId", traceId);
+		}
+
+		final HttpResponse<OperationResponse<String>> response = this.client.post(this.placeAdvancedOrderUrl)
+				.header(API_KEY_HEADER, apiKey).fields(params).asObject(new GenericType<OperationResponse<String>>() {
+				});
+
+		return this.processResponse(response);
 	}
 
 	@Override

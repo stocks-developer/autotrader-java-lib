@@ -116,6 +116,50 @@ public interface ITradingService {
 			TradeType tradeType, OrderType orderType, int quantity, float price, float triggerPrice);
 
 	/**
+	 * Places an AutoTrader bracket order — our own bracket order, which works with
+	 * every broker we support. For more information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/place-autotrader-bracket-order/">api
+	 * docs</a>.
+	 *
+	 * @param pseudoAccount    pseudo account
+	 * @param exchange         exchange
+	 * @param symbol           symbol
+	 * @param tradeType        trade type
+	 * @param orderType        order type
+	 * @param quantity         quantity
+	 * @param price            price
+	 * @param triggerPrice     trigger price (entry trigger; pass zero otherwise)
+	 * @param target           target, in rupees away from your entry price
+	 * @param stoploss         stoploss, in rupees away from your entry price
+	 * @param trailingStoploss trailing stoploss step, in rupees
+	 * @return the order id given by your stock broker
+	 */
+	IOperationResponse<String> placeAutoTraderBracketOrder(String pseudoAccount, String exchange, String symbol,
+			TradeType tradeType, OrderType orderType, int quantity, float price, float triggerPrice, float target,
+			float stoploss, float trailingStoploss);
+
+	/**
+	 * Places an AutoTrader cover order — a stoploss without a target, which works
+	 * with every broker we support. For more information, please see <a href=
+	 * "https://stocksdeveloper.in/documentation/api/place-autotrader-cover-order/">api
+	 * docs</a>.
+	 *
+	 * @param pseudoAccount    pseudo account
+	 * @param exchange         exchange
+	 * @param symbol           symbol
+	 * @param tradeType        trade type
+	 * @param orderType        order type
+	 * @param quantity         quantity
+	 * @param price            price
+	 * @param stoploss         stoploss, in rupees away from your entry price
+	 * @param trailingStoploss trailing stoploss step, in rupees
+	 * @return the order id given by your stock broker
+	 */
+	IOperationResponse<String> placeAutoTraderCoverOrder(String pseudoAccount, String exchange, String symbol,
+			TradeType tradeType, OrderType orderType, int quantity, float price, float stoploss,
+			float trailingStoploss);
+
+	/**
 	 * Cancels all open orders for the given account. For more information, please
 	 * see
 	 * <a href="https://stocksdeveloper.in/documentation/api/cancel-all-orders/">api
@@ -301,6 +345,21 @@ public interface ITradingService {
 	IOperationResponse<String> placeOrderMCA(String apiKey, String pseudoAccount, String exchange, String symbol,
 			TradeType tradeType, OrderType orderType, ProductType productType, int quantity, float price,
 			float triggerPrice, Validity validity, Boolean amo, String publisherId, String commandId);
+
+	/**
+	 * This is for internal use. It is used by the signal service to place an
+	 * AutoTrader bracket or cover order from a TradingView alert.
+	 * <p>
+	 * Same as the {@code traceId} variant below, plus the order variety and the
+	 * three level fields. {@code target} / {@code stoploss} /
+	 * {@code trailingStoploss} are distances in rupees from the fill price and are
+	 * meaningful only for {@link Variety#AT_BO} / {@link Variety#AT_CO}; pass zero
+	 * for a {@link Variety#REGULAR} order.
+	 */
+	IOperationResponse<String> placeOrderMCA(String apiKey, Variety variety, String pseudoAccount, String exchange,
+			String symbol, TradeType tradeType, OrderType orderType, ProductType productType, int quantity, float price,
+			float triggerPrice, float target, float stoploss, float trailingStoploss, Validity validity, Boolean amo,
+			String publisherId, String commandId, String traceId);
 
 	/**
 	 * This is for internal use. It is used by master-child order copying process.
