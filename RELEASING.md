@@ -5,7 +5,7 @@ Maintainer notes for publishing `at-api` to the
 what the [Java library setup guide](https://stocksdeveloper.in/documentation/client-setup/java-library/)
 tells users to add to their build.
 
-Last verified: **2026-08-08** (release 3.2.0).
+Last verified: **2026-08-08** (release 3.3.0).
 
 ## What gets released
 
@@ -22,7 +22,7 @@ Both projects normally sit at an internal version (`1.0.0`, with `project.versio
 - Check what is already published — the version directories under `com/dakshata/at-api/` in the maven
   repo are the source of truth. Never reuse a version.
 - Version line is **3.x** here, independent of the Python and C# libraries (which are on 1.x). Do not
-  try to align them. New API calls are a minor bump (3.1.0 -> 3.2.0).
+  try to align them. New API calls are a minor bump (3.2.0 -> 3.3.0).
 
 ## Steps
 
