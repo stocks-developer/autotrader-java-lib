@@ -21,6 +21,8 @@ import com.dakshata.data.model.autotrader.service.AccountValidationPublic;
 import com.dakshata.data.model.autotrader.service.TradingAccountPublic;
 import com.dakshata.data.model.common.IOperationResponse;
 import com.dakshata.data.model.common.OperationResponse;
+import com.dakshata.trading.model.basket.BasketExecutionResult;
+import com.dakshata.trading.model.basket.BasketPlacementRequest;
 import com.dakshata.trading.model.platform.PlatformHolding;
 import com.dakshata.trading.model.platform.PlatformMargin;
 import com.dakshata.trading.model.platform.PlatformOrder;
@@ -46,6 +48,8 @@ public class TradingService implements ITradingService {
 
 	private static final String TRADING_URI = "/trading";
 
+	private static final String BASKET_URI = "/basket";
+
 	private static final String ACCOUNT_URI = "/account";
 
 	private final String commandUrl, livePseudoAccountsUrl;
@@ -58,6 +62,8 @@ public class TradingService implements ITradingService {
 
 	private final String placeOrderUrl, placeTvOrderUrl, placeRegularOrderUrl, placeCoverOrderUrl, placeBracketOrderUrl,
 			placeAdvancedOrderUrl, placeAutoTraderBracketOrderUrl, placeAutoTraderCoverOrderUrl;
+
+	private final String placeBasketUrl;
 
 	private final String cancelOrderByPlatformIdUrl, modifyOrderByPlatformIdUrl;
 
@@ -80,6 +86,7 @@ public class TradingService implements ITradingService {
 		this.readPlatformHoldingsUrl = serviceUrl + TRADING_URI + "/readPlatformHoldings";
 		this.placeOrderUrl = serviceUrl + TRADING_URI + "/placeOrder";
 		this.placeTvOrderUrl = serviceUrl + TRADING_URI + "/placeTvOrder";
+		this.placeBasketUrl = serviceUrl + BASKET_URI + "/place";
 		this.placeRegularOrderUrl = serviceUrl + TRADING_URI + "/placeRegularOrder";
 		this.placeCoverOrderUrl = serviceUrl + TRADING_URI + "/placeCoverOrder";
 		this.placeBracketOrderUrl = serviceUrl + TRADING_URI + "/placeBracketOrder";
@@ -168,6 +175,20 @@ public class TradingService implements ITradingService {
 
 		final HttpResponse<OperationResponse<Boolean>> response = request.header("Content-Type", "application/json")
 				.body(order).asObject(new GenericType<OperationResponse<Boolean>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<BasketExecutionResult> placeBasket(@NonNull final String apiKey,
+			final BasketPlacementRequest basket) {
+		final HttpRequestWithBody request = this.client.post(this.placeBasketUrl);
+		request.header(API_KEY_HEADER, apiKey);
+
+		final HttpResponse<OperationResponse<BasketExecutionResult>> response = request
+				.header("Content-Type", "application/json").body(basket)
+				.asObject(new GenericType<OperationResponse<BasketExecutionResult>>() {
 				});
 
 		return this.processResponse(response);

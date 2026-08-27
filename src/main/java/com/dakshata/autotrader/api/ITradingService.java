@@ -13,6 +13,8 @@ import com.dakshata.data.model.autotrader.web.AdjustHoldingsResponse;
 import com.dakshata.data.model.autotrader.service.AccountValidationPublic;
 import com.dakshata.data.model.autotrader.service.TradingAccountPublic;
 import com.dakshata.data.model.common.IOperationResponse;
+import com.dakshata.trading.model.basket.BasketExecutionResult;
+import com.dakshata.trading.model.basket.BasketPlacementRequest;
 import com.dakshata.trading.model.platform.PlatformHolding;
 import com.dakshata.trading.model.platform.PlatformMargin;
 import com.dakshata.trading.model.platform.PlatformOrder;
@@ -122,6 +124,27 @@ public interface ITradingService {
 	 * @return the order id given by your stock broker
 	 */
 	IOperationResponse<Boolean> placeTvOrder(String apiKey, TvOrder order);
+
+	/**
+	 * Places one multi-leg option structure across every chosen account, in a single call.
+	 *
+	 * <p>
+	 * The fan-out, the hedge ordering and the exchange freeze slicing all happen server-side. A
+	 * caller looping over legs itself could not guarantee hedge order under a slow response, and
+	 * each leg it sent would be an independent submission with nothing tying them together in the
+	 * record.
+	 * </p>
+	 *
+	 * <p>
+	 * A {@code status=false} response whose message explains the refusal means <b>nothing was
+	 * placed</b> — the basket was rejected before the first order went out. Any other failure
+	 * means orders may already be live, so the outcome must be reviewed rather than retried.
+	 * </p>
+	 *
+	 * @param basket the resolved legs, the accounts, the product type and the lot multiplier
+	 * @return the execution id, its roll-up status and one result per account
+	 */
+	IOperationResponse<BasketExecutionResult> placeBasket(String apiKey, BasketPlacementRequest basket);
 
 	/**
 	 * Places a regular order. For more information, please see <a href=
