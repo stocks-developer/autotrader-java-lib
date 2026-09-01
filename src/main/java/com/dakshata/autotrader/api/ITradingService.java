@@ -19,6 +19,7 @@ import com.dakshata.trading.model.platform.PlatformHolding;
 import com.dakshata.trading.model.platform.PlatformMargin;
 import com.dakshata.trading.model.platform.PlatformOrder;
 import com.dakshata.trading.model.platform.PlatformPosition;
+import com.dakshata.trading.model.instrument.AccountContractSizing;
 import com.dakshata.trading.model.portfolio.IOrder;
 import com.dakshata.trading.model.tv.order.TvOrder;
 import com.dakshata.trading.model.tv.position.TvPosSqOff;
@@ -429,6 +430,26 @@ public interface ITradingService {
 	 * @return at-desktop minimum version
 	 */
 	IOperationResponse<String> autoTraderDesktopMinVersion();
+
+	/**
+	 * This is for internal use. Resolves the sizing numbers for one contract <b>as they apply to
+	 * one account</b>: the lot size that account's broker declares, and the underlying's exchange
+	 * freeze cap.
+	 * <p>
+	 * The lot size is a per-broker fact, not a per-contract one. On MCX GOLDM, Angel declares 100
+	 * units per lot and Zerodha declares 1, and each is describing its own API correctly. Resolving
+	 * it from the single-row-per-symbol independent instrument instead yields whichever broker's
+	 * instrument download happened to run last, which can change with nothing else changing.
+	 * <p>
+	 * Resolution only - the caller still decides the quantity and still slices it.
+	 *
+	 * @param apiKey        the caller's API key
+	 * @param pseudoAccount the account the order would be placed into
+	 * @param exchange      independent exchange name, e.g. {@code MCX}
+	 * @param symbol        independent (normalised) symbol, e.g. {@code GOLDM_04-SEP-2026_FUT}
+	 */
+	IOperationResponse<AccountContractSizing> resolveContractSizing(String apiKey, String pseudoAccount,
+			String exchange, String symbol);
 
 	/**
 	 * This is for internal use. It is used by master-child order copying process.

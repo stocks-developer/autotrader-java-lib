@@ -27,6 +27,7 @@ import com.dakshata.trading.model.platform.PlatformHolding;
 import com.dakshata.trading.model.platform.PlatformMargin;
 import com.dakshata.trading.model.platform.PlatformOrder;
 import com.dakshata.trading.model.platform.PlatformPosition;
+import com.dakshata.trading.model.instrument.AccountContractSizing;
 import com.dakshata.trading.model.portfolio.IOrder;
 import com.dakshata.trading.model.tv.order.TvOrder;
 import com.dakshata.trading.model.tv.position.TvPosSqOff;
@@ -65,6 +66,8 @@ public class TradingService implements ITradingService {
 
 	private final String placeBasketUrl;
 
+	private final String resolveContractSizingUrl;
+
 	private final String cancelOrderByPlatformIdUrl, modifyOrderByPlatformIdUrl;
 
 	private final String cancelChildOrdersByPlatformIdUrl, cancelAllOrdersUrl;
@@ -91,6 +94,7 @@ public class TradingService implements ITradingService {
 		this.placeCoverOrderUrl = serviceUrl + TRADING_URI + "/placeCoverOrder";
 		this.placeBracketOrderUrl = serviceUrl + TRADING_URI + "/placeBracketOrder";
 		this.placeAdvancedOrderUrl = serviceUrl + TRADING_URI + "/placeAdvancedOrder";
+		this.resolveContractSizingUrl = serviceUrl + TRADING_URI + "/resolveContractSizing";
 		this.placeAutoTraderBracketOrderUrl = serviceUrl + TRADING_URI + "/placeAutoTraderBracketOrder";
 		this.placeAutoTraderCoverOrderUrl = serviceUrl + TRADING_URI + "/placeAutoTraderCoverOrder";
 		this.cancelOrderByPlatformIdUrl = serviceUrl + TRADING_URI + "/cancelOrderByPlatformId";
@@ -619,6 +623,22 @@ public class TradingService implements ITradingService {
 		final HttpResponse<OperationResponse<List<AdjustHoldingsResponse>>> response = request
 				.header("Content-Type", "application/json").body(input)
 				.asObject(new GenericType<OperationResponse<List<AdjustHoldingsResponse>>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<AccountContractSizing> resolveContractSizing(final String apiKey,
+			final String pseudoAccount, final String exchange, final String symbol) {
+		final Map<String, Object> params = new HashMap<>();
+		params.put("pseudoAccount", pseudoAccount);
+		params.put("exchange", exchange);
+		params.put("symbol", symbol);
+
+		final HttpResponse<OperationResponse<AccountContractSizing>> response = this.client
+				.post(this.resolveContractSizingUrl).header(API_KEY_HEADER, apiKey).fields(params)
+				.asObject(new GenericType<OperationResponse<AccountContractSizing>>() {
 				});
 
 		return this.processResponse(response);
