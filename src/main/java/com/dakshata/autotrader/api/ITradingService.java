@@ -14,6 +14,7 @@ import com.dakshata.data.model.autotrader.service.AccountValidationPublic;
 import com.dakshata.data.model.autotrader.service.TradingAccountPublic;
 import com.dakshata.data.model.common.IOperationResponse;
 import com.dakshata.trading.model.basket.BasketExecutionResult;
+import com.dakshata.trading.model.basket.BasketExitPreview;
 import com.dakshata.trading.model.basket.BasketPlacementRequest;
 import com.dakshata.trading.model.platform.PlatformHolding;
 import com.dakshata.trading.model.platform.PlatformMargin;
@@ -146,6 +147,43 @@ public interface ITradingService {
 	 * @return the execution id, its roll-up status and one result per account
 	 */
 	IOperationResponse<BasketExecutionResult> placeBasket(String apiKey, BasketPlacementRequest basket);
+
+	/**
+	 * What squaring off a basket WOULD send. Places nothing.
+	 *
+	 * <p>
+	 * Worth calling before {@link #squareOffBasket}, because the answer is often not what a
+	 * trader expects. A basket's own fills and what an account still holds diverge the moment
+	 * anything else touches the same strikes, so "close this structure" can legitimately come
+	 * back as "3 of your 4 accounts, and one of those only partly".
+	 * </p>
+	 *
+	 * @param entryExecutionId the basket execution to take off
+	 * @return what would be sent, in send order, with a plain-language shortfall when the exit
+	 *         cannot cover the whole basket
+	 */
+	IOperationResponse<BasketExitPreview> previewBasketExit(String apiKey, Long entryExecutionId);
+
+	/**
+	 * Squares off a basket: reverses its own fills, clamped to what is actually held.
+	 *
+	 * <p>
+	 * 🔴 <b>Clamped, and never more.</b> Exiting more than you hold does not close anything — it
+	 * opens a fresh position the other way. So the quantity sent is the basket's own fills capped
+	 * by the live position, buys first because the buys cover the shorts, and a position that
+	 * could not be read is left alone rather than guessed at.
+	 * </p>
+	 *
+	 * <p>
+	 * The plan is rebuilt server-side rather than taken from a preview, so a stale browser tab
+	 * cannot decide what reaches a broker. As with {@link #placeBasket}, a {@code status=false}
+	 * whose message explains the refusal means nothing was placed.
+	 * </p>
+	 *
+	 * @param entryExecutionId the basket execution to take off
+	 * @return the SQUARE_OFF execution's id, roll-up status and per-account results
+	 */
+	IOperationResponse<BasketExecutionResult> squareOffBasket(String apiKey, Long entryExecutionId);
 
 	/**
 	 * Places a regular order. For more information, please see <a href=

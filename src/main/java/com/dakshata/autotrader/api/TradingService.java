@@ -22,6 +22,7 @@ import com.dakshata.data.model.autotrader.service.TradingAccountPublic;
 import com.dakshata.data.model.common.IOperationResponse;
 import com.dakshata.data.model.common.OperationResponse;
 import com.dakshata.trading.model.basket.BasketExecutionResult;
+import com.dakshata.trading.model.basket.BasketExitPreview;
 import com.dakshata.trading.model.basket.BasketPlacementRequest;
 import com.dakshata.trading.model.platform.PlatformHolding;
 import com.dakshata.trading.model.platform.PlatformMargin;
@@ -66,6 +67,8 @@ public class TradingService implements ITradingService {
 
 	private final String placeBasketUrl;
 
+	private final String basketExitUrl, basketExitPreviewUrl;
+
 	private final String resolveContractSizingUrl;
 
 	private final String cancelOrderByPlatformIdUrl, modifyOrderByPlatformIdUrl;
@@ -90,6 +93,8 @@ public class TradingService implements ITradingService {
 		this.placeOrderUrl = serviceUrl + TRADING_URI + "/placeOrder";
 		this.placeTvOrderUrl = serviceUrl + TRADING_URI + "/placeTvOrder";
 		this.placeBasketUrl = serviceUrl + BASKET_URI + "/place";
+		this.basketExitUrl = serviceUrl + BASKET_URI + "/exit";
+		this.basketExitPreviewUrl = serviceUrl + BASKET_URI + "/exit/preview";
 		this.placeRegularOrderUrl = serviceUrl + TRADING_URI + "/placeRegularOrder";
 		this.placeCoverOrderUrl = serviceUrl + TRADING_URI + "/placeCoverOrder";
 		this.placeBracketOrderUrl = serviceUrl + TRADING_URI + "/placeBracketOrder";
@@ -192,6 +197,34 @@ public class TradingService implements ITradingService {
 
 		final HttpResponse<OperationResponse<BasketExecutionResult>> response = request
 				.header("Content-Type", "application/json").body(basket)
+				.asObject(new GenericType<OperationResponse<BasketExecutionResult>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<BasketExitPreview> previewBasketExit(@NonNull final String apiKey,
+			final Long entryExecutionId) {
+		final HttpRequestWithBody request = this.client.post(this.basketExitPreviewUrl);
+		request.header(API_KEY_HEADER, apiKey);
+
+		final HttpResponse<OperationResponse<BasketExitPreview>> response = request
+				.queryString("execution", entryExecutionId)
+				.asObject(new GenericType<OperationResponse<BasketExitPreview>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<BasketExecutionResult> squareOffBasket(@NonNull final String apiKey,
+			final Long entryExecutionId) {
+		final HttpRequestWithBody request = this.client.post(this.basketExitUrl);
+		request.header(API_KEY_HEADER, apiKey);
+
+		final HttpResponse<OperationResponse<BasketExecutionResult>> response = request
+				.queryString("execution", entryExecutionId)
 				.asObject(new GenericType<OperationResponse<BasketExecutionResult>>() {
 				});
 
