@@ -41,7 +41,15 @@ task fatJar(type: Jar) {
 		'Implementation-Version': archiveVersion
 	}
 	archiveBaseName = project.name + '-all'
-	from { configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }
+	// Our dependencies' build stamps are stripped here. Every com.dakshata jar carries
+	// dakshata/build.properties at the same path, and DuplicatesStrategy.INCLUDE would
+	// write several of them into this archive under one name -- so a reader gets
+	// whichever came first, which is not this artifact's. at-api is published to
+	// customers, so it should carry its own identity and nothing about our internals.
+	// `with jar` below still brings in at-api's own stamp.
+	from({ configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } }) {
+		exclude 'dakshata/build.properties'
+	}
 	with jar
 }
 
