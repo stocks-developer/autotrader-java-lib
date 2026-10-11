@@ -385,6 +385,18 @@ public interface ITradingService {
 	IOperationResponse<Boolean> squareOffTvPosition(String apiKey, TvPosSqOff input);
 
 	/**
+	 * Changes an open position's product type (e.g. MIS to NRML/CNC) at the broker. The whole position
+	 * is converted; trading reads its size from the broker. Portfolio V2 only — deliberately not on
+	 * {@code IAutoTrader}, so it is not part of the customer API.
+	 *
+	 * @param exchange position exchange (broker independent exchange)
+	 * @param symbol   position symbol (broker independent symbol)
+	 * @param newType  the product type to convert to
+	 */
+	IOperationResponse<Boolean> convertPosition(String apiKey, String pseudoAccount, PositionCategory category,
+			PositionType type, String exchange, String symbol, PositionType newType);
+
+	/**
 	 * Submits a square-off portfolio request.
 	 *
 	 * @param pseudoAccount pseudo account

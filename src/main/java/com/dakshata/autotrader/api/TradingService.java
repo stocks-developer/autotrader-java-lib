@@ -77,6 +77,8 @@ public class TradingService implements ITradingService {
 
 	private final String squareOffPositionUrl, squareOffTvPositionUrl, squareOffPortfolioUrl, adjustHoldingsUrl;
 
+	private final String convertPositionUrl;
+
 	private final String autoTraderDesktopVersionUrl, autoTraderDesktopMinVersionUrl;
 
 	@Getter
@@ -116,6 +118,7 @@ public class TradingService implements ITradingService {
 		this.squareOffPositionUrl = serviceUrl + TRADING_URI + "/squareOffPosition";
 		this.squareOffTvPositionUrl = serviceUrl + TRADING_URI + "/squareOffTvPosition";
 		this.squareOffPortfolioUrl = serviceUrl + TRADING_URI + "/squareOffPortfolio";
+		this.convertPositionUrl = serviceUrl + TRADING_URI + "/convertPosition";
 		this.adjustHoldingsUrl = serviceUrl + TRADING_URI + "/adjustHoldings";
 		this.autoTraderDesktopVersionUrl = serviceUrl + TRADING_URI + "/autoTraderDesktopVersion";
 		this.autoTraderDesktopMinVersionUrl = serviceUrl + TRADING_URI + "/autoTraderDesktopMinVersion";
@@ -406,6 +409,30 @@ public class TradingService implements ITradingService {
 		params.put("cancelOpenOrders", cancelOpenOrders);
 
 		final HttpRequestWithBody request = this.client.post(this.squareOffPositionUrl);
+		if (!isEmpty(apiKey)) {
+			request.header(API_KEY_HEADER, apiKey);
+		}
+
+		final HttpResponse<OperationResponse<Boolean>> response = request.fields(params)
+				.asObject(new GenericType<OperationResponse<Boolean>>() {
+				});
+
+		return this.processResponse(response);
+	}
+
+	@Override
+	public IOperationResponse<Boolean> convertPosition(final String apiKey, final String pseudoAccount,
+			final PositionCategory category, final PositionType type, final String exchange, final String symbol,
+			final PositionType newType) {
+		final Map<String, Object> params = new HashMap<>();
+		params.put("pseudoAccount", pseudoAccount);
+		params.put("category", category);
+		params.put("type", type);
+		params.put("exchange", exchange);
+		params.put("symbol", symbol);
+		params.put("newType", newType);
+
+		final HttpRequestWithBody request = this.client.post(this.convertPositionUrl);
 		if (!isEmpty(apiKey)) {
 			request.header(API_KEY_HEADER, apiKey);
 		}
